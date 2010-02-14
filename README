@@ -1,0 +1,55 @@
+igo is an attempt to created a zero-configuration build system for Go. The idea
+is that you should be able to structure your project as multiple packages in
+multiple sub-directories, and be able to build and test all or part of the
+project with a single command, without makefiles.
+
+For example, consider the following directory structure:
+
+    foo/
+        foo1.go  (package foo)
+        foo2.go  (package foo)
+
+        foo1_test.go
+        foo2_test.go
+
+    bar/
+        bar1.go  (package bar)
+        bar1_test.go
+
+        baz/
+            qwerty.go  (package baz)
+            qwerty_test.go
+
+Assume that the packages have these imports:
+
+    foo:
+        import "fmt"
+        import "http"
+
+    bar:
+        import "./bar/baz"
+        import "./foo"
+        import "http"
+
+    baz:
+        import "./foo"
+
+Then the igo commands below will perform the following actions:
+
+    igo build foo
+    (Build foo1.go and foo2.go)
+
+    igo build bar
+    (Build foo, then build bar/baz, then build bar1.go)
+
+    igo build baz
+    (Build foo, then build qwerty.go)
+
+    igo test foo
+    (Build package foo as above, then build and run foo*_test.go)
+
+    igo test foo/foo1_test.go
+    (Build package foo, then build and run just foo1_test.go)
+
+Dependencies are derived purely from imports within .go files, and no makefiles
+are required.
