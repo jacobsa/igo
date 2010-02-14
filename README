@@ -20,6 +20,12 @@ For example, consider the following directory structure:
             qwerty.go  (package baz)
             qwerty_test.go
 
+    driver1/
+        driver1.go (package main)
+
+    driver2/
+        driver2.go (package main)
+
 Assume that the packages have these imports:
 
     foo:
@@ -34,6 +40,9 @@ Assume that the packages have these imports:
     baz:
         import "./foo"
 
+    driver1:
+        import "./foo"
+
 Then the igo commands below will perform the following actions:
 
     igo build foo
@@ -46,10 +55,16 @@ Then the igo commands below will perform the following actions:
     (Build foo, then build qwerty.go)
 
     igo test foo
-    (Build package foo as above, then build and run foo*_test.go)
+    (Build foo as above, then build and run foo*_test.go)
 
     igo test foo/foo1_test.go
-    (Build package foo, then build and run just foo1_test.go)
+    (Build foo, then build and run just foo1_test.go)
+
+    igo build driver1
+    (Build foo, then build and link driver1.go)
+
+    igo run driver1
+    (Build driver1 as above, then run it)
 
 Dependencies are derived purely from imports within .go files, and no makefiles
 are required.
