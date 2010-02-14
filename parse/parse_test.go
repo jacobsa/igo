@@ -4,9 +4,26 @@
 package parse
 
 import (
+	"container/vector"
+	"igo/set"
 	"reflect"
+	"sort"
 	"testing"
 )
+
+func expectContentsEqual(t *testing.T, set *set.StringSet, expected []string) {
+	var contents vector.StringVector
+	for val := range set.Iter() {
+		contents.Push(val)
+	}
+
+	sort.SortStrings(contents)
+	sort.SortStrings(expected)
+
+	if !reflect.DeepEqual(contents.Data(), expected) {
+		t.Errorf("Expected:%v\nGot: %v", expected, contents)
+	}
+}
 
 func TestGetPackageNameEmptyFile(t *testing.T) {
 	code := ""
@@ -61,9 +78,7 @@ func TestExtractImportsEmptyFile(t *testing.T) {
 	expected := []string{}
 
 	imports := ExtractImports(code)
-	if !reflect.DeepEqual(imports, expected) {
-		t.Errorf("Expected empty deps, got: %v", imports)
-	}
+	expectContentsEqual(t, imports, expected)
 }
 
 func TestExtractImportsMultipleImportStatements(t *testing.T) {
@@ -79,9 +94,7 @@ func TestExtractImportsMultipleImportStatements(t *testing.T) {
 	`
 	expected := []string{"./foo/bar", "fmt", "./baz"}
 	imports := ExtractImports(code)
-	if !reflect.DeepEqual(imports, expected) {
-		t.Errorf("Expected: %v\nGot: %v", expected, imports)
-	}
+	expectContentsEqual(t, imports, expected)
 }
 
 func TestExtractImportsImportList(t *testing.T) {
@@ -99,9 +112,7 @@ func TestExtractImportsImportList(t *testing.T) {
 	`
 	expected := []string{"./foo/bar", "fmt", "./baz"}
 	imports := ExtractImports(code)
-	if !reflect.DeepEqual(imports, expected) {
-		t.Errorf("Expected: %v\nGot: %v", expected, imports)
-	}
+	expectContentsEqual(t, imports, expected)
 }
 
 func TestExtractImportsSyntaxErrorBeforeImports(t *testing.T) {
@@ -152,7 +163,5 @@ func TestExtractImportsSyntaxErrorAfterImports(t *testing.T) {
 	`
 	expected := []string{"fmt", "os"}
 	imports := ExtractImports(code)
-	if !reflect.DeepEqual(imports, expected) {
-		t.Errorf("Expected: %v\nGot: %v", expected, imports)
-	}
+	expectContentsEqual(t, imports, expected)
 }

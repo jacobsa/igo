@@ -6,9 +6,9 @@
 package parse
 
 import (
-	"container/vector"
 	"go/ast"
 	"go/parser"
+	"igo/set"
 	"regexp"
 )
 
@@ -24,7 +24,7 @@ func GetPackageName(source string) string {
 }
 
 // ExtractImports parses the supplied source code for a .go file and
-// returns an array of package names that the file depends upon.
+// returns a set of package names that the file depends upon.
 //
 // For example, if source looks like the following:
 //
@@ -38,24 +38,24 @@ func GetPackageName(source string) string {
 //       ...
 //     }
 //
-// then the result will be [ "./bar/baz", "fmt", "os" ].
+// then the result will be { "./bar/baz", "fmt", "os" }.
 //
 // An attempt is made to return the imports for the file even if there is a
 // syntax error elsewhere in the file.
-func ExtractImports(source string) []string {
+func ExtractImports(source string) *set.StringSet {
 	node, err := parser.ParseFile("", source, nil, parser.ImportsOnly)
 	if err != nil {
-		return []string{}
+		return &set.StringSet{}
 	}
 
 	var visitor importVisitor
 	ast.Walk(&visitor, node)
 
-	return visitor.imports.Data()
+	return &visitor.imports
 }
 
 type importVisitor struct {
-	imports vector.StringVector
+	imports set.StringSet
 }
 
 var importRegexp *regexp.Regexp = regexp.MustCompile(`"(.+)"`)
@@ -69,7 +69,7 @@ func (v *importVisitor) Visit(node interface{}) ast.Visitor {
 				continue
 			}
 
-			v.imports.Push(matches[1])
+			v.imports.Insert(matches[1])
 		}
 	}
 
