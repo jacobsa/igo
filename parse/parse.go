@@ -5,6 +5,13 @@
 // information from Go source files.
 package parse
 
+import (
+	"container/vector"
+	"go/ast"
+	"go/parser"
+	"regexp"
+)
+
 // ExtractImports parses the supplied source code for a .go file and
 // returns an array of package names that the file depends upon.
 //
@@ -25,5 +32,31 @@ package parse
 // An attempt is made to return the imports for the file even if there is a
 // syntax error elsewhere in the file.
 func ExtractImports(source string) []string {
-	return []string{}
+	node, err := parser.ParseFile("", source, nil, parser.ImportsOnly)
+	if err != nil { return []string{} }
+
+	var visitor importVisitor
+	ast.Walk(&visitor, node)
+
+	return visitor.imports.Data()
+}
+
+type importVisitor struct {
+	imports vector.StringVector
+}
+
+var importRegexp *regexp.Regexp = regexp.MustCompile(`"(.+)"`)
+
+func (v *importVisitor) Visit(node interface{}) ast.Visitor {
+	switch t := node.(type) {
+		case *ast.ImportSpec:
+			for _, component := range node.(*ast.ImportSpec).Path {
+				matches := importRegexp.MatchStrings(string(component.Value))
+				if len(matches) < 2 { continue }
+
+				v.imports.Push(matches[1])
+			}
+	}
+
+	return v
 }

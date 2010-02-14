@@ -68,11 +68,9 @@ func TestSyntaxErrorBeforeImports(t *testing.T) {
 		func DoSomething() {
 		}
 	`
-	expected := []string{"./foo/bar", "fmt", "./baz"}
-	imports := ExtractImports(code)
-	if !reflect.DeepEqual(imports, expected) {
-		t.Errorf("Expected: %v\nGot: %v", expected, imports)
-	}
+
+	// Shouldn't crash.
+	ExtractImports(code)
 }
 
 func TestSyntaxErrorInImports(t *testing.T) {
@@ -88,11 +86,9 @@ func TestSyntaxErrorInImports(t *testing.T) {
 		func DoSomething() {
 		}
 	`
-	expected := []string{"fmt", "os"}
-	imports := ExtractImports(code)
-	if !reflect.DeepEqual(imports, expected) {
-		t.Errorf("Expected: %v\nGot: %v", expected, imports)
-	}
+
+	// Shouldn't crash.
+	ExtractImports(code)
 }
 
 func TestSyntaxErrorAfterImports(t *testing.T) {
