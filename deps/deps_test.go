@@ -20,6 +20,15 @@ func indexOf(haystack []string, needle string) int {
 	return len(haystack)
 }
 
+func addDeps(depsMap map[string]*set.StringSet, name string, deps []string) {
+	var set set.StringSet
+	for _, val := range deps {
+		set.Insert(val)
+	}
+
+	depsMap[name] = &set
+}
+
 func TestEmptyMap(t *testing.T) {
 	input := make(map[string][]string)
 	result := BuildTotalOrder(input)
@@ -31,7 +40,7 @@ func TestEmptyMap(t *testing.T) {
 
 func TestSinglePackageNoDeps(t *testing.T) {
 	input := make(map[string][]string)
-	input["foo"] = []string{}
+	addDeps(input, "foo", []string{})
 
 	expected := []string{"foo"}
 	result := BuildTotalOrder(input)
@@ -43,7 +52,7 @@ func TestSinglePackageNoDeps(t *testing.T) {
 
 func TestSinglePackageOnlyForeignDeps(t *testing.T) {
 	input := make(map[string][]string)
-	input["foo"] = []string{"http", "os", "fmt"}
+	addDeps(input, "foo", []string{"http", "os", "fmt"})
 
 	expected := []string{"foo"}
 	result := BuildTotalOrder(input)

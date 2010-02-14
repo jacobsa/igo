@@ -6,10 +6,12 @@
 package deps
 
 import (
+	"igo/set"
 )
 
-// TODO(jacobsa): Comments.
-// TODO(jacobsa): Accept a map of sets instead.
-func BuildTotalOrder(dependencies map[string][]string) []string {
+// BuildTotalOrder accepts a map from package names to the dependencies of
+// those packages, and returns a safe order in which to compile them (assuming
+// there are no circular dependencies).
+func BuildTotalOrder(dependencies map[string]*set.StringSet) []string {
 	return []string{}
 }
