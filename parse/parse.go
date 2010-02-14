@@ -12,6 +12,17 @@ import (
 	"regexp"
 )
 
+// GetPackageName returns the package name from the supplied .go file source
+// code, or the empty string if it could not be properly parsed.
+func GetPackageName(source string) string {
+	fileNode, err := parser.ParseFile("", source, nil, parser.ImportsOnly)
+	if err != nil {
+		return ""
+	}
+
+	return fileNode.Name.Name()
+}
+
 // ExtractImports parses the supplied source code for a .go file and
 // returns an array of package names that the file depends upon.
 //

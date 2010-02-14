@@ -8,7 +8,55 @@ import (
 	"testing"
 )
 
-func TestEmptyFile(t *testing.T) {
+func TestGetPackageNameEmptyFile(t *testing.T) {
+	code := ""
+	expected := ""
+
+	packageName := GetPackageName(code)
+	if packageName != expected {
+		t.Errorf("Expected %s, got: %s", expected, packageName)
+	}
+}
+
+func TestGetPackageNameGoodFile(t *testing.T) {
+	code := `
+		package asdf
+
+		import "./foo/bar"
+		import "fmt"
+		import "./baz"
+
+		func DoSomething() {
+		}
+	`
+	expected := "asdf"
+
+	packageName := GetPackageName(code)
+	if packageName != expected {
+		t.Errorf("Expected: %s\nGot: %s", expected, packageName)
+	}
+}
+
+func TestGetPackageNameSyntaxError(t *testing.T) {
+	code := `
+		package asdf ljksdhk ksd
+
+		import "./foo/bar"
+		import "fmt"
+		import "./baz"
+
+		func DoSomething() {
+		}
+	`
+	expected := ""
+
+	packageName := GetPackageName(code)
+	if packageName != expected {
+		t.Errorf("Expected: %s\nGot: %s", expected, packageName)
+	}
+}
+
+func TestExtractImportsEmptyFile(t *testing.T) {
 	code := ""
 	expected := []string{}
 
@@ -18,7 +66,7 @@ func TestEmptyFile(t *testing.T) {
 	}
 }
 
-func TestMultipleImportStatements(t *testing.T) {
+func TestExtractImportsMultipleImportStatements(t *testing.T) {
 	code := `
 		package asdf
 
@@ -36,7 +84,7 @@ func TestMultipleImportStatements(t *testing.T) {
 	}
 }
 
-func TestImportList(t *testing.T) {
+func TestExtractImportsImportList(t *testing.T) {
 	code := `
 		package asdf
 
@@ -56,7 +104,7 @@ func TestImportList(t *testing.T) {
 	}
 }
 
-func TestSyntaxErrorBeforeImports(t *testing.T) {
+func TestExtractImportsSyntaxErrorBeforeImports(t *testing.T) {
 	code := `
 		package asdf
 		kjdfgkjdlshfjghdfkg
@@ -73,7 +121,7 @@ func TestSyntaxErrorBeforeImports(t *testing.T) {
 	ExtractImports(code)
 }
 
-func TestSyntaxErrorInImports(t *testing.T) {
+func TestExtractImportsSyntaxErrorInImports(t *testing.T) {
 	code := `
 		package asdf
 
@@ -91,7 +139,7 @@ func TestSyntaxErrorInImports(t *testing.T) {
 	ExtractImports(code)
 }
 
-func TestSyntaxErrorAfterImports(t *testing.T) {
+func TestExtractImportsSyntaxErrorAfterImports(t *testing.T) {
 	code := `
 		package asdf
 
