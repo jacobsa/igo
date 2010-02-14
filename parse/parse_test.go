@@ -9,13 +9,106 @@ import (
 )
 
 func TestEmptyFile(t *testing.T) {
-	deps, err := ExtractDependencies("")
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
+	code := ""
+	expected := []string{}
 
-	expected := make([]string, 0)
-	if !reflect.DeepEqual(deps, expected) {
-		t.Errorf("Expected empty deps, got: %v", deps)
+	imports := ExtractImports(code)
+	if !reflect.DeepEqual(imports, expected) {
+		t.Errorf("Expected empty deps, got: %v", imports)
+	}
+}
+
+func TestMultipleImportStatements(t *testing.T) {
+	code := `
+		package asdf
+
+		import "./foo/bar"
+		import "fmt"
+		import "./baz"
+
+		func DoSomething() {
+		}
+	`
+	expected := []string{"./foo/bar", "fmt", "./baz"}
+	imports := ExtractImports(code)
+	if !reflect.DeepEqual(imports, expected) {
+		t.Errorf("Expected: %v\nGot: %v", expected, imports)
+	}
+}
+
+func TestImportList(t *testing.T) {
+	code := `
+		package asdf
+
+		import (
+			"./foo/bar"
+			"fmt"
+			"./baz"
+		)
+
+		func DoSomething() {
+		}
+	`
+	expected := []string{"./foo/bar", "fmt", "./baz"}
+	imports := ExtractImports(code)
+	if !reflect.DeepEqual(imports, expected) {
+		t.Errorf("Expected: %v\nGot: %v", expected, imports)
+	}
+}
+
+func TestSyntaxErrorBeforeImports(t *testing.T) {
+	code := `
+		package asdf
+		kjdfgkjdlshfjghdfkg
+
+		import "./foo/bar"
+		import "fmt"
+		import "./baz"
+
+		func DoSomething() {
+		}
+	`
+	expected := []string{"./foo/bar", "fmt", "./baz"}
+	imports := ExtractImports(code)
+	if !reflect.DeepEqual(imports, expected) {
+		t.Errorf("Expected: %v\nGot: %v", expected, imports)
+	}
+}
+
+func TestSyntaxErrorInImports(t *testing.T) {
+	code := `
+		package asdf
+
+		import (
+			"fmt"
+			dkfjlgjkf
+			"os"
+		)
+
+		func DoSomething() {
+		}
+	`
+	expected := []string{"fmt", "os"}
+	imports := ExtractImports(code)
+	if !reflect.DeepEqual(imports, expected) {
+		t.Errorf("Expected: %v\nGot: %v", expected, imports)
+	}
+}
+
+func TestSyntaxErrorAfterImports(t *testing.T) {
+	code := `
+		package asdf
+
+		import (
+			"fmt"
+			"os"
+		)
+
+		func DoSomething() {
+	`
+	expected := []string{"fmt", "os"}
+	imports := ExtractImports(code)
+	if !reflect.DeepEqual(imports, expected) {
+		t.Errorf("Expected: %v\nGot: %v", expected, imports)
 	}
 }
