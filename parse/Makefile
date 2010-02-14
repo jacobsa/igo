@@ -1,7 +1,7 @@
 include $(GOROOT)/src/Make.$(GOARCH)
 
-TARG=igo/deps
+TARG=igo/parse
 GOFILES=\
-	deps.go\
+	parse.go\
 
 include $(GOROOT)/src/Make.pkg
