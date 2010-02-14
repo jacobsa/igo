@@ -32,5 +32,13 @@ func (set *StringSet) Contains(s string) bool {
 // Insert adds s to the set, so that Contains(s) will now be true if it wasn't
 // already.
 func (set *StringSet) Insert(s string) {
-	set.elements.Push(s)
+	if !set.Contains(s) {
+		set.elements.Push(s)
+	}
+}
+
+// Iter returns an iterator for the elements in the set. The order of the
+// elements is not guaranteed.
+func (set *StringSet) Iter() <-chan string {
+	return set.elements.Iter()
 }
