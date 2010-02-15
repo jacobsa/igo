@@ -137,7 +137,7 @@ func TestSeveralFiles(t *testing.T) {
 	`)
 
 	// Without tests
-	files, deps := GetPackageInfo(dir, true)
+	files, deps := GetPackageInfo(dir, false)
 	expectSetContents(t,
 		[]string{
 			path.Join(dir, "foo.go"),
@@ -187,6 +187,36 @@ func TestIgnoresSubdir(t *testing.T) {
 		package other
 		import (
 			"./asd"
+		)
+	`)
+
+	files, deps := GetPackageInfo(dir, true)
+	expectSetContents(t, []string{path.Join(dir, "foo.go")}, files)
+	expectSetContents(t, []string{"./foo", "http"}, deps)
+}
+
+func TestIgnoresNonGoFile(t *testing.T) {
+	dir := createTempDir()
+	defer os.RemoveAll(dir)
+
+	// foo.go
+	file := createFile(dir, "foo.go")
+	defer file.Close()
+	writeFile(file, `
+		package blah
+		import (
+			"./foo"
+			"http"
+		)
+	`)
+
+	// bar.txt
+	otherFile := createFile(dir, "bar.txt")
+	defer otherFile.Close()
+	writeFile(otherFile, `
+		package blah
+		import (
+			"asdf"
 		)
 	`)
 
