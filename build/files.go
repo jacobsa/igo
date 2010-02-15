@@ -27,10 +27,10 @@ func GetPackageInfo(dir string, includeTests bool) (files *set.StringSet, deps *
 
 type packageInfoVisitor struct {
 	includeTests bool
-	originalDir string
+	originalDir  string
 
 	files set.StringSet
-	deps set.StringSet
+	deps  set.StringSet
 }
 
 func (v *packageInfoVisitor) VisitDir(path string, d *os.Dir) bool {
@@ -42,7 +42,7 @@ func (v *packageInfoVisitor) VisitFile(file string, d *os.Dir) {
 	// Ignore files that aren't Go source.
 	if path.Ext(file) != ".go" {
 		return
-  }
+	}
 
 	// Ignore test files if we haven't been told to include them.
 	if !v.includeTests && strings.HasSuffix(file, "_test.go") {
