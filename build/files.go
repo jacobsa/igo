@@ -5,7 +5,9 @@
 package build
 
 import (
+	"igo/parse"
 	"igo/set"
+	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -48,4 +50,9 @@ func (v *packageInfoVisitor) VisitFile(file string, d *os.Dir) {
 	}
 
 	v.files.Insert(file)
+
+	contents, err := ioutil.ReadFile(file)
+	if err == nil {
+		v.deps.Union(parse.ExtractImports(string(contents)))
+	}
 }
