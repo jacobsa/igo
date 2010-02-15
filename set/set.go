@@ -39,6 +39,4 @@ func (set *StringSet) Insert(s string) {
 
 // Iter returns an iterator for the elements in the set. The order of the
 // elements is not guaranteed.
-func (set *StringSet) Iter() <-chan string {
-	return set.elements.Iter()
-}
+func (set *StringSet) Iter() <-chan string { return set.elements.Iter() }

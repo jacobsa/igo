@@ -38,14 +38,16 @@ type packageNode struct {
 // acyclic graphs.
 type topologicalSortVisitor struct {
 	result vector.StringVector
-	nodes map[string]*packageNode
-	edges map[string]*set.StringSet
+	nodes  map[string]*packageNode
+	edges  map[string]*set.StringSet
 }
 
 func (v *topologicalSortVisitor) Visit(name string) {
-  // Is this an unvisited node for a package we care about?
+	// Is this an unvisited node for a package we care about?
 	node, ok := v.nodes[name]
-	if !ok || node.visited { return }
+	if !ok || node.visited {
+		return
+	}
 
 	node.visited = true
 	for otherName := range v.edges[name].Iter() {
