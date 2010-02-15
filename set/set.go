@@ -37,6 +37,13 @@ func (set *StringSet) Insert(s string) {
 	}
 }
 
+// Union adds the elements from s to d.
+func (d *StringSet) Union(s *StringSet) {
+	for val := range s.Iter() {
+		d.Insert(val)
+	}
+}
+
 // Iter returns an iterator for the elements in the set. The order of the
 // elements is not guaranteed.
 func (set *StringSet) Iter() <-chan string { return set.elements.Iter() }

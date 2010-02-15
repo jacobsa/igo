@@ -101,3 +101,27 @@ func TestRepeatedInserts(t *testing.T) {
 		t.Errorf("Expected: %v\nGot: %v", expected, sorted)
 	}
 }
+
+func TestUnion(t *testing.T) {
+	var set1 StringSet
+	set1.Insert("foo")
+	set1.Insert("baz")
+
+	var set2 StringSet
+	set2.Insert("foo")
+	set2.Insert("bar")
+
+	set1.Union(&set2)
+
+	sorted1 := getSorted(&set1)
+	expected1 := []string{"bar", "baz", "foo"}
+	if !reflect.DeepEqual(sorted1, expected1) {
+		t.Errorf("Expected: %v\nGot: %v", expected1, sorted1)
+	}
+
+	sorted2 := getSorted(&set2)
+	expected2 := []string{"bar", "foo"}
+	if !reflect.DeepEqual(sorted2, expected2) {
+		t.Errorf("Expected: %v\nGot: %v", expected2, sorted2)
+	}
+}
