@@ -51,7 +51,7 @@ Then the igo commands below will perform the following actions:
     igo build bar
     (Build foo, then build bar/baz, then build bar1.go)
 
-    igo build baz
+    igo build bar/baz
     (Build foo, then build qwerty.go)
 
     igo test foo
