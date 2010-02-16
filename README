@@ -1,7 +1,7 @@
-igo is an attempt to created a zero-configuration build system for Go. The idea
-is that you should be able to structure your project as multiple packages in
-multiple sub-directories, and be able to build and test all or part of the
-project with a single command, without makefiles.
+igo is an attempt to created a zero-configuration build system for Go.  You
+structure your project as multiple packages in multiple sub-directories, and
+can build and test all or part of the project with a single command, without
+makefiles.
 
 For example, consider the following directory structure:
 
@@ -17,7 +17,7 @@ For example, consider the following directory structure:
         bar1_test.go
 
         baz/
-            qwerty.go  (package baz)
+            qwerty.go  (package bar/baz)
             qwerty_test.go
 
     driver1/
@@ -56,9 +56,6 @@ Then the igo commands below will perform the following actions:
 
     igo test foo
     (Build foo as above, then build and run foo*_test.go)
-
-    igo test foo/foo1_test.go
-    (Build foo, then build and run just foo1_test.go)
 
     igo build driver1
     (Build foo, then build and link driver1.go)
