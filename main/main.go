@@ -64,7 +64,6 @@ func compileFiles(files *set.StringSet, targetBaseName string) {
 		os.Exit(1)
 	}
 
-
 	// Pack
 	var gopackArgs vector.StringVector
 	gopackArgs.Push("grc")
@@ -97,7 +96,9 @@ func main() {
 
 		// Have we already processed this directory?
 		_, alreadyDone := packageDeps[dir]
-		if alreadyDone { continue }
+		if alreadyDone {
+			continue
+		}
 
 		dirInfo := build.GetDirectoryInfo(dir, false)
 		if dirInfo.PackageName == "" {
@@ -111,7 +112,9 @@ func main() {
 		packageDeps[dir] = dirInfo.Deps
 
 		for dep := range dirInfo.Deps.Iter() {
-			if strings.HasPrefix(dep, "./") { remainingDirs.Push(dep) }
+			if strings.HasPrefix(dep, "./") {
+				remainingDirs.Push(dep)
+			}
 		}
 	}
 
