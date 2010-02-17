@@ -13,8 +13,8 @@ For example, consider the following directory structure:
         foo2_test.go
 
     bar/
-        bar1.go  (package bar)
-        bar1_test.go
+        bar.go  (package bar)
+        bar_test.go
 
         baz/
             qwerty.go  (package bar/baz)
@@ -41,6 +41,7 @@ Assume that the packages have these imports:
         import "./foo"
 
     driver1:
+        import "./bar"
         import "./foo"
 
 Then the igo commands below will perform the following actions:
@@ -49,7 +50,7 @@ Then the igo commands below will perform the following actions:
     (Build foo1.go and foo2.go)
 
     igo build bar
-    (Build foo, then build bar/baz, then build bar1.go)
+    (Build foo, then build bar/baz, then build bar.go)
 
     igo build bar/baz
     (Build foo, then build qwerty.go)
@@ -58,7 +59,7 @@ Then the igo commands below will perform the following actions:
     (Build foo as above, then build and run foo*_test.go)
 
     igo build driver1
-    (Build foo, then build and link driver1.go)
+    (Build foo, then build bar, then build and link driver1.go)
 
     igo run driver1
     (Build driver1 as above, then run it)
