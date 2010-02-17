@@ -75,12 +75,22 @@ func compileFiles(files *set.StringSet, targetBaseName string) {
 	}
 }
 
+func printUsageAndExit() {
+	fmt.Println("Usage:")
+	fmt.Println("  igo build <directory name>")
+	os.Exit(1)
+}
+
 func main() {
 	flag.Parse()
 
-	if flag.NArg() != 2 || flag.Arg(0) != "build" {
-		fmt.Println("Usage: igo build <directory name>")
-		os.Exit(1)
+	if flag.NArg() != 2 {
+		printUsageAndExit()
+	}
+
+	command := flag.Arg(0)
+	if command != "build" {
+		printUsageAndExit()
 	}
 
 	// Grab dependency and file information for every local package, starting
