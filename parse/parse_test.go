@@ -25,6 +25,10 @@ func expectContentsEqual(t *testing.T, set *set.StringSet, expected []string) {
 	}
 }
 
+////////////////////////////////
+// GetPackageName
+////////////////////////////////
+
 func TestGetPackageNameEmptyFile(t *testing.T) {
 	code := ""
 	expected := ""
@@ -72,6 +76,11 @@ func TestGetPackageNameSyntaxError(t *testing.T) {
 		t.Errorf("Expected: %s\nGot: %s", expected, packageName)
 	}
 }
+
+
+////////////////////////////////
+// GetImports
+////////////////////////////////
 
 func TestGetImportsEmptyFile(t *testing.T) {
 	code := ""
@@ -163,5 +172,77 @@ func TestGetImportsSyntaxErrorAfterImports(t *testing.T) {
 	`
 	expected := []string{"fmt", "os"}
 	imports := GetImports(code)
+	expectContentsEqual(t, imports, expected)
+}
+
+
+////////////////////////////////
+// GetTestFunctions
+////////////////////////////////
+
+func TestGetTestFunctionsEmptyFile(t *testing.T) {
+	code := ""
+	expected := []string{}
+
+	imports := GetTestFunctions(code)
+	expectContentsEqual(t, imports, expected)
+}
+
+func TestGetTestFunctionsNoTestFunctions(t *testing.T) {
+	code := `
+		package asdf
+
+		import (
+			"fmt"
+			"os"
+			"testing"
+		)
+
+		func DoSomething() {}
+	`
+	expected := []string{}
+
+	imports := GetTestFunctions(code)
+	expectContentsEqual(t, imports, expected)
+}
+
+func TestGetTestFunctionsSomeResults(t *testing.T) {
+	code := `
+		package asdf
+
+		import (
+			"fmt"
+			"os"
+			"testing"
+		)
+
+		func TestBlah(t *testing.T) {}
+		func DoSomething() {}
+		func TestFooBar(t *testing.T) {}
+	`
+	expected := []string{"TestBlah", "TestFooBar"}
+
+	imports := GetTestFunctions(code)
+	expectContentsEqual(t, imports, expected)
+}
+
+func TestGetTestFunctionsSyntaxError(t *testing.T) {
+	code := `
+		package asdf
+
+		import (
+			"fmt"
+			"os"
+			"testing"
+		)
+
+		func TestBlah(t *testing.T) {}
+		func DoSomething() {}
+		func TestFooBar(t *testing.T) {}
+		func ljlsdfkj {
+	`
+	expected := []string{}
+
+	imports := GetTestFunctions(code)
 	expectContentsEqual(t, imports, expected)
 }

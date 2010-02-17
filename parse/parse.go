@@ -10,6 +10,7 @@ import (
 	"go/parser"
 	"igo/set"
 	"regexp"
+	"strings"
 )
 
 // GetPackageName returns the package name from the supplied .go file source
@@ -70,6 +71,50 @@ func (v *importVisitor) Visit(node interface{}) ast.Visitor {
 			}
 
 			v.imports.Insert(matches[1])
+		}
+	}
+
+	return v
+}
+
+// GetTestFunctions parses the supplied source code for a .go file and returns
+// a set of test function names contained within it. Test functions are summed
+// to begin with the prefix "Test".
+//
+// For example, if source looks like the following:
+//
+//     import "testing"
+//
+//     func DoSomething() {
+//       ...
+//     }
+//
+//     func TestBlah(t *testing.T) { ... }
+//     func TestAsdf(t *testing.T) { ... }
+//
+// then the result will be { "TestBlah", "TestAsdf" }.
+func GetTestFunctions(source string) *set.StringSet {
+	node, err := parser.ParseFile("", source, nil, 0)
+	if err != nil {
+		return &set.StringSet{}
+	}
+
+	var visitor testFunctionVisitor
+	ast.Walk(&visitor, node)
+
+	return &visitor.testFunctions
+}
+
+type testFunctionVisitor struct {
+	testFunctions set.StringSet
+}
+
+func (v *testFunctionVisitor) Visit(node interface{}) ast.Visitor {
+	switch t := node.(type) {
+	case *ast.FuncDecl:
+		name := node.(*ast.FuncDecl).Name.Obj.Name
+		if strings.HasPrefix(name, "Test") {
+			v.testFunctions.Insert(name)
 		}
 	}
 
