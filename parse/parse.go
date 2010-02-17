@@ -23,8 +23,8 @@ func GetPackageName(source string) string {
 	return fileNode.Name.Name()
 }
 
-// ExtractImports parses the supplied source code for a .go file and
-// returns a set of package names that the file depends upon.
+// GetImports parses the supplied source code for a .go file and returns a set
+// of package names that the file depends upon.
 //
 // For example, if source looks like the following:
 //
@@ -42,7 +42,7 @@ func GetPackageName(source string) string {
 //
 // An attempt is made to return the imports for the file even if there is a
 // syntax error elsewhere in the file.
-func ExtractImports(source string) *set.StringSet {
+func GetImports(source string) *set.StringSet {
 	node, err := parser.ParseFile("", source, nil, parser.ImportsOnly)
 	if err != nil {
 		return &set.StringSet{}

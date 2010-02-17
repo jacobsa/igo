@@ -73,15 +73,15 @@ func TestGetPackageNameSyntaxError(t *testing.T) {
 	}
 }
 
-func TestExtractImportsEmptyFile(t *testing.T) {
+func TestGetImportsEmptyFile(t *testing.T) {
 	code := ""
 	expected := []string{}
 
-	imports := ExtractImports(code)
+	imports := GetImports(code)
 	expectContentsEqual(t, imports, expected)
 }
 
-func TestExtractImportsMultipleImportStatements(t *testing.T) {
+func TestGetImportsMultipleImportStatements(t *testing.T) {
 	code := `
 		package asdf
 
@@ -93,11 +93,11 @@ func TestExtractImportsMultipleImportStatements(t *testing.T) {
 		}
 	`
 	expected := []string{"./foo/bar", "fmt", "./baz"}
-	imports := ExtractImports(code)
+	imports := GetImports(code)
 	expectContentsEqual(t, imports, expected)
 }
 
-func TestExtractImportsImportList(t *testing.T) {
+func TestGetImportsImportList(t *testing.T) {
 	code := `
 		package asdf
 
@@ -111,11 +111,11 @@ func TestExtractImportsImportList(t *testing.T) {
 		}
 	`
 	expected := []string{"./foo/bar", "fmt", "./baz"}
-	imports := ExtractImports(code)
+	imports := GetImports(code)
 	expectContentsEqual(t, imports, expected)
 }
 
-func TestExtractImportsSyntaxErrorBeforeImports(t *testing.T) {
+func TestGetImportsSyntaxErrorBeforeImports(t *testing.T) {
 	code := `
 		package asdf
 		kjdfgkjdlshfjghdfkg
@@ -129,10 +129,10 @@ func TestExtractImportsSyntaxErrorBeforeImports(t *testing.T) {
 	`
 
 	// Shouldn't crash.
-	ExtractImports(code)
+	GetImports(code)
 }
 
-func TestExtractImportsSyntaxErrorInImports(t *testing.T) {
+func TestGetImportsSyntaxErrorInImports(t *testing.T) {
 	code := `
 		package asdf
 
@@ -147,10 +147,10 @@ func TestExtractImportsSyntaxErrorInImports(t *testing.T) {
 	`
 
 	// Shouldn't crash.
-	ExtractImports(code)
+	GetImports(code)
 }
 
-func TestExtractImportsSyntaxErrorAfterImports(t *testing.T) {
+func TestGetImportsSyntaxErrorAfterImports(t *testing.T) {
 	code := `
 		package asdf
 
@@ -162,6 +162,6 @@ func TestExtractImportsSyntaxErrorAfterImports(t *testing.T) {
 		func DoSomething() {
 	`
 	expected := []string{"fmt", "os"}
-	imports := ExtractImports(code)
+	imports := GetImports(code)
 	expectContentsEqual(t, imports, expected)
 }

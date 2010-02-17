@@ -65,7 +65,7 @@ func (v *directoryInfoVisitor) VisitFile(file string, d *os.Dir) {
 
 	contents, err := ioutil.ReadFile(file)
 	if err == nil {
-		v.deps.Union(parse.ExtractImports(string(contents)))
+		v.deps.Union(parse.GetImports(string(contents)))
 		if v.packageName == "" {
 			v.packageName = parse.GetPackageName(string(contents))
 		}
