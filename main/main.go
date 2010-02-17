@@ -75,6 +75,21 @@ func compileFiles(files *set.StringSet, targetBaseName string) {
 	}
 }
 
+// linkBinary calls 6l to link the binary of the given name, which must have
+// already been compiled with compileFiles.
+func linkBinary(name string) {
+	linkerPath := path.Join(os.Getenv("GOBIN"), "6l")
+
+	var linkerArgs vector.StringVector
+	linkerArgs.Push("-o")
+	linkerArgs.Push(name)
+	linkerArgs.Push(name + ".6")
+
+	if !executeCommand(linkerPath, linkerArgs.Data(), "igo-out/") {
+		os.Exit(1)
+	}
+}
+
 func printUsageAndExit() {
 	fmt.Println("Usage:")
 	fmt.Println("  igo build <directory name>")
@@ -98,8 +113,9 @@ func main() {
 	requiredFiles := make(map[string]*set.StringSet)
 	packageDeps := make(map[string]*set.StringSet)
 
+	specifiedDir := flag.Arg(1)
 	var remainingDirs vector.StringVector
-	remainingDirs.Push("./" + flag.Arg(1))
+	remainingDirs.Push("./" + specifiedDir)
 
 	for remainingDirs.Len() > 0 {
 		dir := remainingDirs.Pop()
@@ -143,5 +159,10 @@ func main() {
 	for _, currentPackage := range totalOrder {
 		fmt.Printf("\nCompiling package: %s\n", currentPackage)
 		compileFiles(requiredFiles[currentPackage], currentPackage)
+	}
+
+	// If this is a binary, also link it.
+	if build.GetDirectoryInfo(specifiedDir, false).PackageName == "main" {
+		linkBinary(specifiedDir)
 	}
 }
