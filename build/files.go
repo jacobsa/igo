@@ -15,34 +15,47 @@ import (
 
 type DirectoryInfo struct {
 	PackageName string
-	Files       *set.StringSet // .go files to be compiled in the directory.
-	Deps        *set.StringSet // Imports of the .go files to be compiled.
+
+	// .go files and their dependencies necessary for building the package as a
+	// library.
+	Files *set.StringSet
+	Deps  *set.StringSet
+
+	// .go files and their dependencies necessary for building the package tests,
+	// in addition tot he ones above.
+	TestFiles *set.StringSet
+	TestDeps  *set.StringSet
 }
 
 // GetDirectoryInfo scans the supplied directory, determining what package it
-// represents (see below), what .go files it contains, and what their package
-// dependencies are. If includeTests is false, files ending in "_test.go" are
-// excluded from this determination.
+// represents (see below), what .go files it contains (test and non-test), and
+// what their package dependencies are.
 //
 // Sub-directories are not traversed. It is assumed that all of the .go files
 // in the directory (not including its sub-directories) belong to the same
 // package.
-func GetDirectoryInfo(dir string, includeTests bool) DirectoryInfo {
+func GetDirectoryInfo(dir string) DirectoryInfo {
 	var visitor directoryInfoVisitor
-	visitor.includeTests = includeTests
 	visitor.originalDir = dir
 
 	path.Walk(dir, &visitor, nil)
-	return DirectoryInfo{visitor.packageName, &visitor.files, &visitor.deps}
+	return DirectoryInfo{
+		visitor.packageName,
+		&visitor.files,
+		&visitor.deps,
+		&visitor.testFiles,
+		&visitor.testDeps,
+	}
 }
 
 type directoryInfoVisitor struct {
-	includeTests bool
-	originalDir  string // The directory supplied by the user.
+	originalDir string // The directory supplied by the user.
 
 	packageName string
 	files       set.StringSet
 	deps        set.StringSet
+	testFiles   set.StringSet
+	testDeps    set.StringSet
 }
 
 func (v *directoryInfoVisitor) VisitDir(dir string, d *os.Dir) bool {
@@ -56,16 +69,19 @@ func (v *directoryInfoVisitor) VisitFile(file string, d *os.Dir) {
 		return
 	}
 
-	// Ignore test files if we haven't been told to include them.
-	if !v.includeTests && strings.HasSuffix(file, "_test.go") {
-		return
+	// Is this a normal source file or a test file?
+	files := &v.files
+	deps := &v.deps
+	if strings.HasSuffix(file, "_test.go") {
+		files = &v.testFiles
+		deps = &v.testDeps
 	}
 
-	v.files.Insert(file)
+	files.Insert(file)
 
 	contents, err := ioutil.ReadFile(file)
 	if err == nil {
-		v.deps.Union(parse.GetImports(string(contents)))
+		deps.Union(parse.GetImports(string(contents)))
 		if v.packageName == "" {
 			v.packageName = parse.GetPackageName(string(contents))
 		}

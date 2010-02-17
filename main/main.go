@@ -126,7 +126,7 @@ func main() {
 			continue
 		}
 
-		dirInfo := build.GetDirectoryInfo(dir, false)
+		dirInfo := build.GetDirectoryInfo(dir)
 		if dirInfo.PackageName == "" {
 			fmt.Printf("Couldn't find .go files to build in directory: %s\n", dir)
 			os.Exit(1)
@@ -162,7 +162,7 @@ func main() {
 	}
 
 	// If this is a binary, also link it.
-	if build.GetDirectoryInfo(specifiedDir, false).PackageName == "main" {
+	if build.GetDirectoryInfo(specifiedDir).PackageName == "main" {
 		linkBinary(specifiedDir)
 	}
 }
