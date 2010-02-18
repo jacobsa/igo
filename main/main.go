@@ -169,7 +169,12 @@ func main() {
 		compileFiles(requiredFiles[currentPackage], currentPackage)
 	}
 
-	// If we're testing, create a test runner and compile it.
+	// If this is a binary, also link it.
+	if build.GetDirectoryInfo(specifiedPackage).PackageName == "main" {
+		linkBinary(specifiedPackage)
+	}
+
+	// If we're testing, create a test runner, build it, and run it.
 	if command == "test" {
 		const outputFile = "igo-out/test_runner.go"
 		testFuncs := build.GetDirectoryInfo(specifiedPackage).TestFuncs
@@ -183,10 +188,9 @@ func main() {
 		files.Insert("igo-out/test_runner.go")
 		compileFiles(&files, "test_runner")
 		linkBinary("test_runner")
-	}
 
-	// If this is a binary, also link it.
-	if build.GetDirectoryInfo(specifiedPackage).PackageName == "main" {
-		linkBinary(specifiedPackage)
+		if !executeCommand("igo-out/test_runner", []string{}, "") {
+			os.Exit(1)
+		}
 	}
 }

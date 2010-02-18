@@ -51,9 +51,9 @@ import "testing"
 import "./blah"
 
 var tests = []testing.Test {
-	blah.TestFoo,
-	blah.TestBar,
-	blah.TestBaz,
+	testing.Test{"TestFoo", blah.TestFoo},
+	testing.Test{"TestBar", blah.TestBar},
+	testing.Test{"TestBaz", blah.TestBaz},
 }
 
 func main() {

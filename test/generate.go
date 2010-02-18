@@ -28,7 +28,7 @@ func GenerateTestMain(packageName string, funcs *set.StringSet) string {
 
 	result += "var tests = []testing.Test {\n"
 	for _, val := range funcVec.Data() {
-		result += fmt.Sprintf("\t%s.%s,\n", packageName, val)
+		result += fmt.Sprintf("\ttesting.Test{\"%s\", %s.%s},\n", val, packageName, val)
 	}
 
 	result += "}\n\n"
