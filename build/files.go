@@ -25,6 +25,9 @@ type DirectoryInfo struct {
 	// in addition tot he ones above.
 	TestFiles *set.StringSet
 	TestDeps  *set.StringSet
+
+	// Names of test functions within the package.
+	TestFuncs *set.StringSet
 }
 
 // GetDirectoryInfo scans the supplied directory, determining what package it
@@ -45,6 +48,7 @@ func GetDirectoryInfo(dir string) DirectoryInfo {
 		&visitor.deps,
 		&visitor.testFiles,
 		&visitor.testDeps,
+		&visitor.testFuncs,
 	}
 }
 
@@ -56,6 +60,7 @@ type directoryInfoVisitor struct {
 	deps        set.StringSet
 	testFiles   set.StringSet
 	testDeps    set.StringSet
+	testFuncs   set.StringSet
 }
 
 func (v *directoryInfoVisitor) VisitDir(dir string, d *os.Dir) bool {
@@ -72,7 +77,8 @@ func (v *directoryInfoVisitor) VisitFile(file string, d *os.Dir) {
 	// Is this a normal source file or a test file?
 	files := &v.files
 	deps := &v.deps
-	if strings.HasSuffix(file, "_test.go") {
+	isTest := strings.HasSuffix(file, "_test.go")
+	if isTest {
 		files = &v.testFiles
 		deps = &v.testDeps
 	}
@@ -85,5 +91,9 @@ func (v *directoryInfoVisitor) VisitFile(file string, d *os.Dir) {
 		if v.packageName == "" {
 			v.packageName = parse.GetPackageName(string(contents))
 		}
+	}
+
+	if isTest {
+		v.testFuncs.Union(parse.GetTestFunctions(string(contents)))
 	}
 }

@@ -137,6 +137,8 @@ func TestSeveralFiles(t *testing.T) {
 	writeFile(testFile1, `
 		package blah
 		import "./asdf"
+
+		func TestFoo(t *testing.T) {}
 	`)
 
 	// bar_test.go
@@ -146,6 +148,9 @@ func TestSeveralFiles(t *testing.T) {
 	writeFile(testFile2, `
 		package blah
 		import "./qwerty"
+
+		func TestBar(t *testing.T) {}
+		func TestBaz(t *testing.T) {}
 	`)
 
 	info := GetDirectoryInfo(dir)
@@ -165,8 +170,9 @@ func TestSeveralFiles(t *testing.T) {
 		},
 		info.TestFiles)
 
-	expectSetContents(t, []string{"./asdf", "./qwerty"}, info.TestDeps)
 	expectSetContents(t, []string{"fmt"}, info.Deps)
+	expectSetContents(t, []string{"./asdf", "./qwerty"}, info.TestDeps)
+	expectSetContents(t, []string{"TestFoo", "TestBar", "TestBaz"}, info.TestFuncs)
 }
 
 func TestIgnoresSubdir(t *testing.T) {
