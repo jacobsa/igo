@@ -7,6 +7,8 @@ import (
 	"igo/build"
 	"igo/deps"
 	"igo/set"
+	"igo/test"
+	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -104,7 +106,7 @@ func main() {
 	}
 
 	command := flag.Arg(0)
-	if command != "build" {
+	if command != "build" && command != "test" {
 		printUsageAndExit()
 	}
 
@@ -138,7 +140,14 @@ func main() {
 		requiredFiles[packageName] = dirInfo.Files
 		packageDeps[packageName] = dirInfo.Deps
 
-		for dep := range dirInfo.Deps.Iter() {
+		// If we're testing and this is the package under test, also add its test
+		// files and dependencies.
+		if packageName == specifiedPackage && command == "test" {
+			requiredFiles[packageName].Union(dirInfo.TestFiles)
+			packageDeps[packageName].Union(dirInfo.TestDeps)
+		}
+
+		for dep := range packageDeps[packageName].Iter() {
 			remainingPackages.Push(dep)
 		}
 	}
@@ -158,6 +167,22 @@ func main() {
 	for _, currentPackage := range totalOrder {
 		fmt.Printf("\nCompiling package: %s\n", currentPackage)
 		compileFiles(requiredFiles[currentPackage], currentPackage)
+	}
+
+	// If we're testing, create a test runner and compile it.
+	if command == "test" {
+		const outputFile = "igo-out/test_runner.go"
+		testFuncs := build.GetDirectoryInfo(specifiedPackage).TestFuncs
+		code := test.GenerateTestMain(specifiedPackage, testFuncs)
+		err := ioutil.WriteFile("igo-out/test_runner.go", strings.Bytes(code), 0600)
+		if err != nil {
+			panic(err)
+		}
+
+		var files set.StringSet
+		files.Insert("igo-out/test_runner.go")
+		compileFiles(&files, "test_runner")
+		linkBinary("test_runner")
 	}
 
 	// If this is a binary, also link it.
