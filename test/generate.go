@@ -13,7 +13,7 @@ import (
 // GenerateTestMain returns the source code for a test program that will run
 // the specified test functions from the specified package.
 func GenerateTestMain(packageName string, funcs *set.StringSet) string {
-  var funcVec vector.StringVector
+	var funcVec vector.StringVector
 	for val := range funcs.Iter() {
 		funcVec.Push(val)
 	}

@@ -27,7 +27,7 @@ func TestEmptySet(t *testing.T) {
 	// If there are no test functions, the test runner shouldn't import the
 	// package.
 	expected :=
-`package main
+		`package main
 
 import "testing"
 var tests = []testing.Test {
@@ -45,7 +45,7 @@ func TestNonEmptySet(t *testing.T) {
 	// If there are no test functions, the test runner shouldn't import the
 	// package.
 	expected :=
-`package main
+		`package main
 
 import "testing"
 import "./blah"

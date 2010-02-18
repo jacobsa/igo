@@ -16,13 +16,13 @@ import (
 type DirectoryInfo struct {
 	PackageName string
 
-	// .go files and their dependencies necessary for building the package as a
-	// library.
+	// .go files and their local dependencies necessary for building the package
+	// as a library.
 	Files *set.StringSet
 	Deps  *set.StringSet
 
-	// .go files and their dependencies necessary for building the package tests,
-	// in addition tot he ones above.
+	// .go files and their local dependencies necessary for building the package
+	// tests, in addition to the ones above.
 	TestFiles *set.StringSet
 	TestDeps  *set.StringSet
 
@@ -32,7 +32,7 @@ type DirectoryInfo struct {
 
 // GetDirectoryInfo scans the supplied directory, determining what package it
 // represents (see below), what .go files it contains (test and non-test), and
-// what their package dependencies are.
+// what their local package dependencies are.
 //
 // Sub-directories are not traversed. It is assumed that all of the .go files
 // in the directory (not including its sub-directories) belong to the same
@@ -87,7 +87,12 @@ func (v *directoryInfoVisitor) VisitFile(file string, d *os.Dir) {
 
 	contents, err := ioutil.ReadFile(file)
 	if err == nil {
-		deps.Union(parse.GetImports(string(contents)))
+		for dep := range parse.GetImports(string(contents)).Iter() {
+			if strings.HasPrefix(dep, "./") {
+				deps.Insert(dep[2:])
+			}
+		}
+
 		if v.packageName == "" {
 			v.packageName = parse.GetPackageName(string(contents))
 		}

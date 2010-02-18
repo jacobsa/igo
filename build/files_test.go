@@ -103,7 +103,7 @@ func TestOneFile(t *testing.T) {
 	info := GetDirectoryInfo(dir)
 	expectEqual(t, "blah", info.PackageName)
 	expectSetContents(t, []string{path.Join(dir, "file.go")}, info.Files)
-	expectSetContents(t, []string{"./foo", "fmt", "http"}, info.Deps)
+	expectSetContents(t, []string{"foo"}, info.Deps)
 	expectSetContents(t, []string{}, info.TestFiles)
 	expectSetContents(t, []string{}, info.TestDeps)
 }
@@ -119,6 +119,7 @@ func TestSeveralFiles(t *testing.T) {
 	writeFile(prodFile1, `
 		package blah
 		import "fmt"
+		import "./qwerty"
 		func DoNothing() {}
 	`)
 
@@ -170,8 +171,8 @@ func TestSeveralFiles(t *testing.T) {
 		},
 		info.TestFiles)
 
-	expectSetContents(t, []string{"fmt"}, info.Deps)
-	expectSetContents(t, []string{"./asdf", "./qwerty"}, info.TestDeps)
+	expectSetContents(t, []string{"qwerty"}, info.Deps)
+	expectSetContents(t, []string{"asdf", "qwerty"}, info.TestDeps)
 	expectSetContents(t, []string{"TestFoo", "TestBar", "TestBaz"}, info.TestFuncs)
 }
 
@@ -209,7 +210,7 @@ func TestIgnoresSubdir(t *testing.T) {
 	info := GetDirectoryInfo(dir)
 	expectEqual(t, "blah", info.PackageName)
 	expectSetContents(t, []string{path.Join(dir, "foo.go")}, info.Files)
-	expectSetContents(t, []string{"./foo", "http"}, info.Deps)
+	expectSetContents(t, []string{"foo"}, info.Deps)
 	expectSetContents(t, []string{}, info.TestFiles)
 	expectSetContents(t, []string{}, info.TestDeps)
 }
@@ -242,7 +243,7 @@ func TestIgnoresNonGoFile(t *testing.T) {
 	info := GetDirectoryInfo(dir)
 	expectEqual(t, "blah", info.PackageName)
 	expectSetContents(t, []string{path.Join(dir, "foo.go")}, info.Files)
-	expectSetContents(t, []string{"./foo", "http"}, info.Deps)
+	expectSetContents(t, []string{"foo"}, info.Deps)
 	expectSetContents(t, []string{}, info.TestFiles)
 	expectSetContents(t, []string{}, info.TestDeps)
 }

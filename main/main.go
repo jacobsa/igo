@@ -113,19 +113,20 @@ func main() {
 	requiredFiles := make(map[string]*set.StringSet)
 	packageDeps := make(map[string]*set.StringSet)
 
-	specifiedDir := flag.Arg(1)
-	var remainingDirs vector.StringVector
-	remainingDirs.Push("./" + specifiedDir)
+	specifiedPackage := flag.Arg(1)
+	var remainingPackages vector.StringVector
+	remainingPackages.Push(specifiedPackage)
 
-	for remainingDirs.Len() > 0 {
-		dir := remainingDirs.Pop()
+	for remainingPackages.Len() > 0 {
+		packageName := remainingPackages.Pop()
 
 		// Have we already processed this directory?
-		_, alreadyDone := packageDeps[dir]
+		_, alreadyDone := packageDeps[packageName]
 		if alreadyDone {
 			continue
 		}
 
+		dir := "./" + packageName
 		dirInfo := build.GetDirectoryInfo(dir)
 		if dirInfo.PackageName == "" {
 			fmt.Printf("Couldn't find .go files to build in directory: %s\n", dir)
@@ -134,13 +135,11 @@ func main() {
 
 		// Stash information about this package, and add its local dependencies to
 		// the queue.
-		requiredFiles[dir] = dirInfo.Files
-		packageDeps[dir] = dirInfo.Deps
+		requiredFiles[packageName] = dirInfo.Files
+		packageDeps[packageName] = dirInfo.Deps
 
 		for dep := range dirInfo.Deps.Iter() {
-			if strings.HasPrefix(dep, "./") {
-				remainingDirs.Push(dep)
-			}
+			remainingPackages.Push(dep)
 		}
 	}
 
@@ -162,7 +161,7 @@ func main() {
 	}
 
 	// If this is a binary, also link it.
-	if build.GetDirectoryInfo(specifiedDir).PackageName == "main" {
-		linkBinary(specifiedDir)
+	if build.GetDirectoryInfo(specifiedPackage).PackageName == "main" {
+		linkBinary(specifiedPackage)
 	}
 }
