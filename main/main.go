@@ -42,10 +42,23 @@ func executeCommand(tool string, args []string, dir string) bool {
 	return waitMsg.ExitStatus() == 0
 }
 
+var compilers = map[string]string {
+	"amd64": "6g",
+	"386": "8g",
+	"arm": "5g",
+}
+
 // compileFiles invokes 6g with the appropriate arguments for compiling the
 // supplied set of .go files, and exits the program if the subprocess fails.
 func compileFiles(files *set.StringSet, targetBaseName string) {
-	compilerPath := path.Join(os.Getenv("GOBIN"), "6g")
+	compilerName, ok := compilers[os.Getenv("GOARCH")]
+	if !ok {
+		fmt.Println("Could not determine the correct compiler to run.")
+		fmt.Println("Please ensure that $GOARCH is set.")
+		os.Exit(1)
+	}
+
+	compilerPath := path.Join(os.Getenv("GOBIN"), compilerName)
 	gopackPath := path.Join(os.Getenv("GOBIN"), "gopack")
 
 	targetDir, _ := path.Split(targetBaseName)
@@ -77,15 +90,28 @@ func compileFiles(files *set.StringSet, targetBaseName string) {
 	}
 }
 
+var linkers = map[string]string {
+	"amd64": "6l",
+	"386": "8l",
+	"arm": "5l",
+}
+
 // linkBinary calls 6l to link the binary of the given name, which must have
 // already been compiled with compileFiles.
 func linkBinary(name string) {
-	linkerPath := path.Join(os.Getenv("GOBIN"), "6l")
+	linkerName, ok := linkers[os.Getenv("GOARCH")]
+	if !ok {
+		fmt.Println("Could not determine the correct linker to run.")
+		fmt.Println("Please ensure that $GOARCH is set.")
+		os.Exit(1)
+	}
+
+	linkerPath := path.Join(os.Getenv("GOBIN"), linkerName)
 
 	var linkerArgs vector.StringVector
 	linkerArgs.Push("-o")
 	linkerArgs.Push(name)
-	linkerArgs.Push(name + ".6")
+	linkerArgs.Push(name + "." + linkerName[0:1])
 
 	if !executeCommand(linkerPath, linkerArgs.Data(), "igo-out/") {
 		os.Exit(1)
