@@ -64,12 +64,11 @@ var importRegexp *regexp.Regexp = regexp.MustCompile(`"(.+)"`)
 func (v *importVisitor) Visit(node interface{}) ast.Visitor {
 	switch t := node.(type) {
 	case *ast.ImportSpec:
-		for _, component := range node.(*ast.ImportSpec).Path {
-			matches := importRegexp.MatchStrings(string(component.Value))
-			if len(matches) < 2 {
-				continue
-			}
-
+		component := node.(*ast.ImportSpec).Path
+		matches := importRegexp.MatchStrings(string(component.Value))
+		if len(matches) < 2 {
+			// skipping this?
+		} else {
 			v.imports.Insert(matches[1])
 		}
 	}
